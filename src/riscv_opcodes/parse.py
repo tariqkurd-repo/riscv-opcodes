@@ -1,18 +1,17 @@
-#!/usr/bin/env python3
-
 import argparse
 import json
 import logging
 import pprint
 
-from c_utils import make_c
-from chisel_utils import make_chisel
-from constants import emitted_pseudo_ops
-from go_utils import make_go
-from latex_utils import make_latex_table, make_priv_latex_table
-from rust_utils import make_rust
-from shared_utils import add_segmented_vls_insn, create_inst_dict
-from sverilog_utils import make_sverilog
+from .c_utils import make_c
+from .chisel_utils import make_chisel
+from .constants import emitted_pseudo_ops
+from .go_utils import make_go
+from .latex_utils import make_latex_table, make_priv_latex_table
+from .rust_utils import make_rust
+from .shared_utils import add_segmented_vls_insn, create_inst_dict
+from .sverilog_utils import make_sverilog
+from .svg_utils import make_svg
 
 LOG_FORMAT = "%(levelname)s:: %(message)s"
 LOG_LEVEL = logging.INFO
@@ -31,12 +30,14 @@ def generate_extensions(
     rust: bool,
     go: bool,
     latex: bool,
+    svg: bool,
 ):
     instr_dict = create_inst_dict(extensions, include_pseudo)
     instr_dict = dict(sorted(instr_dict.items()))
+    instr_dict_with_segment = add_segmented_vls_insn(instr_dict)
 
     with open("instr_dict.json", "w", encoding="utf-8") as outfile:
-        json.dump(add_segmented_vls_insn(instr_dict), outfile, indent=2)
+        json.dump(instr_dict_with_segment, outfile, indent=2)
 
     if c:
         instr_dict_c = create_inst_dict(
@@ -63,7 +64,7 @@ def generate_extensions(
         logging.info("inst.rs generated successfully")
 
     if go:
-        make_go(instr_dict)
+        make_go(instr_dict_with_segment)
         logging.info("inst.go generated successfully")
 
     if latex:
@@ -71,6 +72,10 @@ def generate_extensions(
         logging.info("instr-table.tex generated successfully")
         make_priv_latex_table()
         logging.info("priv-instr-table.tex generated successfully")
+
+    if svg:
+        make_svg(instr_dict)
+        logging.info("inst.svg generated successfully")
 
 
 def main():
@@ -91,6 +96,7 @@ def main():
     parser.add_argument("-rust", action="store_true", help="Generate output for Rust")
     parser.add_argument("-go", action="store_true", help="Generate output for Go")
     parser.add_argument("-latex", action="store_true", help="Generate output for Latex")
+    parser.add_argument("-svg", action="store_true", help="Generate .svg output")
     parser.add_argument(
         "extensions",
         nargs="*",
@@ -111,8 +117,5 @@ def main():
         args.rust,
         args.go,
         args.latex,
+        args.svg,
     )
-
-
-if __name__ == "__main__":
-    main()
