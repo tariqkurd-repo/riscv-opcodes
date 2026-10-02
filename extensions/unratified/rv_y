@@ -23,6 +23,8 @@ yss                             rd rs1 rs2                31..25=0b0001_110 14..
 # Operand Types: rd YLEN, rs1 YLEN, rs2 YLEN (0b111)
 yunseals                        rd rs1 rs2                31..25=0b0000_111 14..12=0 6..2=0x1E 1..0=3
 ybld                            rd rs1 rs2                31..25=0b0001_111 14..12=0 6..2=0x1E 1..0=3
+
+# Operand Types: rd YLEN, rs1 reserved for future use (YLEN), rs2 YLEN (0b111)
 yseale                          rd rs2                    31..25=0b0010_111 19..15=0 14..12=0 6..2=0x1E 1..0=3
 
 # 2-OP Instructions (encoded as R-type with using 1111 in the upper bits of funct7 and rs2=funct5)
